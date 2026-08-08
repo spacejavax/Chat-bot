@@ -41,21 +41,43 @@ Be friendly, concise, and professional.
 -If you do not have enough information, clearly say so.
 -If you cannot safely answer, offer to connect the customer with a human. 
 """
-user_message = input("Type: ")
-response = client.chat.send(
-    model="qwen/qwen3-32b",
-    messages=[
-        {
-            "role": "system",
-            "content": "SYSTEM_PROMPT",
-        },
+
+conversation = [
+    {
+        "role": "system",
+        "content": SYSTEM_PROMPT,
+    }
+]
+print("UrbanThread AI: Hi! How can I help you?")
+print("Type quit when you want to end the conversation.")
+
+while True:
+    user_message = input("Type: ").strip()
+
+    if user_message.lower() == "quit":
+        print("UrbanThread AI: Goodbye!")
+        break
+    if not user_message: #true
+        continue #back to input
+    conversation.append(
         {
             "role": "user",
             "content": user_message,
-        },
-    ],
-    stream=False, #waits for complete answer
-)
+        }
+    )
+    response = client.chat.send(
+        model="qwen/qwen3-32b",
+        messages=conversation,
+        stream=False,
+    )
 
+    assistant_message = response.choices[0].message.content
 
-print("UrbanThread AI:", response.choices[0].message.content)
+    conversation.append(
+        {
+            "role": "assistant",
+            "content": assistant_message,
+        }
+    )
+
+print("UrbanThread AI:", assistant_message)
