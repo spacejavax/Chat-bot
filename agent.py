@@ -80,4 +80,4 @@ while True:
         }
     )
 
-print("UrbanThread AI:", assistant_message)
+    print("UrbanThread AI:", assistant_message)
