@@ -41,17 +41,21 @@ Be friendly, concise, and professional.
 -If you do not have enough information, clearly say so.
 -If you cannot safely answer, offer to connect the customer with a human. 
 """
-
+user_message = input("Type: ")
 response = client.chat.send(
     model="qwen/qwen3-32b",
     messages=[
         {
+            "role": "system",
+            "content": "SYSTEM_PROMPT",
+        },
+        {
             "role": "user",
-            "content": "Hello! Where is my package?",
+            "content": user_message,
         },
     ],
-    stream=False,
+    stream=False, #waits for complete answer
 )
 
 
-print(response.choices[0].message.content)
+print("UrbanThread AI:", response.choices[0].message.content)
