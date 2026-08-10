@@ -1,7 +1,8 @@
 import os
-
+import json
 from dotenv import load_dotenv
 from openrouter import OpenRouter
+from order_tools import check_order_status
 
 
 load_dotenv()
@@ -42,6 +43,26 @@ Be friendly, concise, and professional.
 -If you cannot safely answer, offer to connect the customer with a human. 
 """
 
+TOOLS = [
+    {
+        "type": "function",
+        "function": {
+            "name": "check_order_status",
+            "description": "Look up a fictional UrbanThread order using its order number",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "order_number": {
+                        "type": "string",
+                        "description": "The customer order number, such as ORD-123",
+                    }
+                },
+                "required": ["order_number"],
+            },
+        },
+    }
+]
+
 conversation = [
     {
         "role": "system",
@@ -68,10 +89,19 @@ while True:
     response = client.chat.send(
         model="qwen/qwen3-32b",
         messages=conversation,
+        tools=TOOLS,
         stream=False,
     )
 
-    assistant_message = response.choices[0].message.content
+    response_message = response.choices[0].message
+    tool_calls = response_message.tool_calls
+
+    if tool_calls:
+        tool_call = tool_calls[0]
+
+        arguments = json.loads(tool_call.function.arguments)
+        
+
 
     conversation.append(
         {
