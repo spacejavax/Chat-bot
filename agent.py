@@ -100,8 +100,45 @@ while True:
         tool_call = tool_calls[0]
 
         arguments = json.loads(tool_call.function.arguments)
-        
+        order_number = arguments["order_number"]
+        order_result = check_order_status(order_number)
 
+        conversation.append(
+            {
+                "role": "assistant",
+                "content": response_message.content,
+                "tool_calls": [
+                    {
+                        "id": tool_call.id,
+                        "type": "function",
+                        "function": {
+                            "name": tool_call.function.name,
+                            "arguments": tool_call.function.arguments,
+                        },
+                    }
+                ],
+            }
+        )
+
+        conversation.append(
+            {
+                "role": "tool",
+                "tool_call_id": tool_call.id,
+                "content": json.dumps(order_result),
+            }
+        )
+
+        final_response = client.chat.send(
+            model="qwen/qwen3-32b",
+            messages=conversation,
+            tools=TOOLS,
+            stream=False,
+        )
+
+        assistant_message = final_response.choices[0].message.content
+
+    else:
+        assistant_message = response_message.content   
 
     conversation.append(
         {
@@ -109,5 +146,4 @@ while True:
             "content": assistant_message,
         }
     )
-
     print("UrbanThread AI:", assistant_message)
