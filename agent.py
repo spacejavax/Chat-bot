@@ -63,36 +63,27 @@ TOOLS = [
     }
 ]
 
-conversation = [
-    {
-        "role": "system",
-        "content": SYSTEM_PROMPT,
-    }
-]
-print("UrbanThread AI: Hi! How can I help you?")
-print("Type quit when you want to end the conversation.")
-
-while True:
-    user_message = input("Type: ").strip()
-
-    if user_message.lower() == "quit":
-        print("UrbanThread AI: Goodbye!")
-        break
-    if not user_message: #true
-        continue #back to input
+def create_conversation():
+    return [
+        {
+            "role": "system",
+            "content": SYSTEM_PROMPT,
+        }
+    ]
+def get_ai_response(user_message, conversation):
     conversation.append(
         {
             "role": "user",
             "content": user_message,
         }
     )
-    response = client.chat.send(
-        model="qwen/qwen3-32b",
-        messages=conversation,
-        tools=TOOLS,
-        stream=False,
-    )
 
+    response = client.chat.send(
+            model="qwen/qwen3-32b",
+            messages=conversation,
+            tools=TOOLS,
+            stream=False,
+        )
     response_message = response.choices[0].message
     tool_calls = response_message.tool_calls
 
@@ -146,4 +137,21 @@ while True:
             "content": assistant_message,
         }
     )
-    print("UrbanThread AI:", assistant_message)
+    return assistant_message
+
+if __name__ == "__main__":
+    conversation = create_conversation()
+
+    print("UrbanThread AI: Hi, how can I help you?")
+    print("Type quit when you want to end the conversation.")
+
+    while True:
+        user_message = input("You ").strip()
+        if user_message.lower() == "quit":
+            print("UrbanThread AI: Goodbye!")
+            break
+
+        if not user_message:
+            continue
+        assistant_message = get_ai_response(user_message, conversation)
+        print("UrbanThread AI:", assistant_message)
